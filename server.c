@@ -16,6 +16,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+//Initialize global variables
 #define SOCKET_PATH "chat_socket"
 #define BUFFER_SIZE 100
 int server_fd, client_fd;
@@ -23,14 +24,18 @@ struct sockaddr_un server_addr, client_addr;
 socklen_t client_len;
 char buffer[BUFFER_SIZE];
 
+//signal handler function
 void signal_handler() {
+    //Clean up
     close(client_fd);
     close(server_fd);
     unlink(SOCKET_PATH);
     exit(1);
 }
 
+//client exiter function
 void client_exit_handler(int signum) {
+    //Clean up
     printf("\nClient exited. Closing server.\n");
     close(client_fd);
     close(server_fd);
@@ -39,9 +44,11 @@ void client_exit_handler(int signum) {
 }
 
 int main() {
-    //Signal handlers
+    //Handle a signal interrupt
     signal(SIGINT, signal_handler);
+    //Ignore the pipe signal
     signal(SIGPIPE, SIG_IGN); 
+    //Custom signal to exit handler
     signal(SIGUSR1, client_exit_handler); 
 
     //Create a socket
@@ -82,38 +89,50 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    //Print initial steps
     printf("Client connected. Start chatting!\n");
     printf("Type '-exit' in order to exit chat!\n");
+
+    //Fork so that it can read and write at the same time
     pid_t pid = fork();
 
     //Infinite loop for the chat
     while (1) {
+        //Child process (recieve message)
         if (pid == 0) {
-
+            //Set memory
             memset(buffer, 0, BUFFER_SIZE);
+            //Wait for a recieve message from client
             if (recv(client_fd, buffer, BUFFER_SIZE, 0) <= 0) {
                 printf("Client disconnected.\n");
                 kill(getppid(), SIGUSR1); 
                 break;
             }
+            //Print client message and reset
             printf("\nClient: %s", buffer);
             printf("You: ");
             fflush(stdout);
 
+            //Check if the client sent an exit command
             if (strncmp(buffer, "-exit", 5) == 0) {
                 printf("\nClient exited. Closing server.\n");
                 kill(getppid(), SIGUSR1);  
                 break;
             }
-        } else if (pid > 0) {
-
+        } 
+        //Parent process (send message)
+        else if (pid > 0) {
+            //Wait for user input
             printf("You: ");
+            memset(buffer, 0, BUFFER_SIZE);
             fgets(buffer, BUFFER_SIZE, stdin);
+            //Send message to the client
             if (send(client_fd, buffer, strlen(buffer), 0) == -1) {
                 perror("Send failed");
                 break;
             }
 
+            //See if server sent exit command
             if (strncmp(buffer, "-exit", 5) == 0) {
                 printf("Exiting Server\n");
                 kill(pid, SIGINT);
@@ -122,8 +141,11 @@ int main() {
         }
     }
 
+    //Clean up by closing fd's and unlink socket
     close(client_fd);
     close(server_fd);
     unlink(SOCKET_PATH);
+
+    //Exit program
     return 0;
 }
