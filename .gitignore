@@ -1,2 +1,7 @@
+#Ignore object files
 *.d
 *.o
+
+#Ignore the output files
+client
+server
