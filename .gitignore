@@ -1,5 +1,7 @@
-#Ignore object files
+#Ignore prerequisites
 *.d
+
+#Ignore object files
 *.o
 
 #Ignore the output files
