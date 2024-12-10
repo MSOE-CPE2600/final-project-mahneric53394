@@ -50,7 +50,7 @@ int main() {
     }
 
     printf("Connected to the server. Start chatting!\n");
-    printf("Type 'exit.' in order to exit chat!\n");
+    printf("Type '-exit' in order to exit chat!\n");
     pid_t pid = fork();
 
     //Infinite loop for the chat
@@ -66,7 +66,7 @@ int main() {
                 break;
             }
 
-            if (strncmp(buffer, "exit.", 5) == 0) {
+            if (strncmp(buffer, "-exit", 5) == 0) {
                 printf("Exiting client\n");
                 kill(getppid(), SIGINT);
                 break;
@@ -85,7 +85,7 @@ int main() {
             printf("You: ");
             fflush(stdout);
 
-            if (strncmp(buffer, "exit.", 5) == 0) {
+            if (strncmp(buffer, "-exit", 5) == 0) {
                 printf("\nServer exited. Closing client.\n");
                 kill(getppid(), SIGINT);
                 break;
