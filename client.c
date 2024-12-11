@@ -2,7 +2,9 @@
 * Lab 13 (Final Project)
 * Filename: client.c
 * Section: 121
-* Description: 
+* Description: Client can join once the server is up, and
+* can have a conversation with the server terminal until
+* the chat is exited.
 * Author: Eric Mahn and Braydon Hanson
 * Date: 12/9/24
 * Compile Instructions: make 
@@ -65,7 +67,6 @@ int main() {
     while (1) {
         //Child process (send message)
         if(pid == 0) {
-            
             //Wait for user input
             printf("You: ");
             memset(buffer, 0, BUFFER_SIZE);
@@ -93,8 +94,9 @@ int main() {
                 kill(pid, SIGINT);
                 break;
             }
-            //Print message sent from server
-            printf("\nServer: %s", buffer);
+            //Reprint the prompt and the received message
+            printf("\r\033[K");  // Clear the current line
+            printf("Server: %s", buffer);
             printf("You: ");
             fflush(stdout);
 

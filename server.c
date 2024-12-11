@@ -2,7 +2,9 @@
 * Lab 13 (Final Project)
 * Filename: server.c
 * Section: 121
-* Description: 
+* Description: Creates the server and waits for the client
+* to join. When the client joins they can have a
+* conversation with each other until exited.
 * Author: Eric Mahn and Braydon Hanson
 * Date: 12/9/24
 * Compile Instructions: make 
@@ -108,8 +110,9 @@ int main() {
                 kill(getppid(), SIGUSR1); 
                 break;
             }
-            //Print client message and reset
-            printf("\nClient: %s", buffer);
+            //Reprint the prompt and the received message
+            printf("\r\033[K");  // Clear the current line
+            printf("Client: %s", buffer);
             printf("You: ");
             fflush(stdout);
 
